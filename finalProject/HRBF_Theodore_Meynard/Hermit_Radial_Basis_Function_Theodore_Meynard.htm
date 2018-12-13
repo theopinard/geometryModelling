@@ -1,0 +1,564 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.55pt 85.05pt 70.55pt 85.05pt;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><b><span style='font-size:24.0pt;
+font-family:"Times New Roman",serif'>Hermit Radial Basis Function (HRBF) for
+implicit curve</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><b><span
+style='font-size:24.0pt;font-family:"Times New Roman",serif'>Objective</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The objective of this work is to implement in Matlab the reconstruction of a
+surface in 2D or a volume in 3D from Hermit data. The program needs a set of
+unstructured points with their associated normals and returns an implicit
+function which interpolate the entry points and where the gradient is equal to
+the normal at the entry points. This method does not need to fix an offset as
+it is required for Radial Basis Function. Moreover, it is able to represent
+close sheet with better precision than the RBF method. However, the HRBF method
+is strongly dependent of the radius used in the RBF. </span><span
+style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+<br>
+</span><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+To start the calculation, a radial basis function is needed. The gradient and
+hessian need to be calculated for this function. As a reminder in 2D the
+formula for the gradient and hessian of a radial basis function <b>Psi</b> are:</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=760 height=238 id="Picture 31"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image001.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+First will be presented the theoretical results which allow to find the
+implicit function with a focus on how to implement it in Matlab in a efficient
+way. Then will be shown numerical results in 2D with two different RBF: </span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Gaussian </span></li>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Wendland</span></li>
+</ul>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Next will be shown numerical results in 3D with 5 different RBF:</span><span
+style='font-size:12.0pt;font-family:"Times New Roman",serif'> </span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Gaussain </span></li>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Wendland</span></li>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Multiquadratic</span></li>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Inverse
+     multiquadratic</span></li>
+ <li class=MsoNormal style='text-align:justify;line-height:normal'><span
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Polyharmonic
+     spline </span></li>
+</ul>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;&nbsp;</span><span
+style='font-size:12.0pt;font-family:"Times New Roman",serif'> </span><span
+style='font-size:13.5pt;font-family:"Times New Roman",serif'>Finally, will be
+discussed the results and the future works which could be done. </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><span
+style='font-size:13.5pt;font-family:"Times New Roman",serif'><br>
+</span><b><span style='font-size:24.0pt;font-family:"Times New Roman",serif'>Theorical
+result and implementation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The following result are from the Hermite-Birkhoff interpolation at the first
+order. The theoretical results are  explain in 2D to have shorter expression.
+The 3D case can easily be extrapolated from the 2D formula. The program needs n
+non-structured points and their correspondent normals. Let <b>P</b> and <b>N</b>
+be the matrix of points and normal vector associated. The two matrices have n
+lines and 2 rows.&nbsp; </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=637 height=182 id="Picture 30"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image002.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><span
+style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+</span><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>From
+this matrix, can be constructed the matrices <b>X1</b>, <b>X2</b> and finally <b>X</b>.</span><span
+style='font-size:18.0pt;font-family:"Times New Roman",serif'> </span><span
+style='font-size:13.5pt;font-family:"Times New Roman",serif'>To calculate the
+matrix <b>X</b> the operation square root and square are applied to each
+coefficient of the matrix</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=774 height=424 id="Picture 29"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image003.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The matrix <b>X</b> is the distance for all the points one to each other. For
+example, the distance between the point i and j will be in the matrix X(i,j)
+and X(j,i). This matrices <b>X1</b>, <b>X2</b> and <b>X</b> will be used to
+compute the gradient and Hessian from the RBF. It is important to note that the
+RBF is define in Matlab to give a matrixial result. For n points the result of
+the RBF will be a n by n matrix. The gradient will have n rows an 2n columns. Finally,
+the Hessian will have 2n rows and 2n columns.<br>
+<br>
+&nbsp;&nbsp;&nbsp; Then the matrix <b>A</b> can be computed. Using a matrixial
+implementation makes the code easier to understand and also more efficient.
+Indeed, with this expression the calculations are fully matrixial. There is no
+loop &quot;for&quot; in the code. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=844 height=349 id="Picture 28"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image004.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Once the matrix <b>A</b> is computed the problem to be solved is shown here.
+The unknowns are the vector <b>Alpha</b> (n rows) and the matrix <b>Beta</b> (n
+rows and 2 columns)</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=497 height=120 id="Picture 27"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image005.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+With the vector <b>Alpha</b> and the matrix <b>Beta,</b> the implicit function
+for the set of points and normals is defined. Now, will be present how to
+evaluate the implicit function in a mesh grid. Let <b>U</b> be the matrix of
+the points where the implicit function is evaluated. <b>U</b> has m rows and 2
+columns. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=481 height=321 id="Picture 26"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image006.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The resulting matrices <b>V1</b>, <b>V2</b> and <b>V</b> have m rows and n
+columns. Then, to evaluate the function for the m points the following
+matrixial operation is needed. The result is a m vector which give the value of
+the implicit function for each evaluated point.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=651 height=141 id="Picture 25"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image007.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+It is possible to increase the interpolant space by using polynomials
+functions. They improve the interpolation and also delete artefact for big set
+of entry points. In the next section, the results&nbsp;with and without the
+polynomial functions are compared. In this section, the theoretical
+implementation of the new resulting system with the polynomial functions is
+presented.<br>
+<br>
+&nbsp;&nbsp;&nbsp; From the entry points P, it is possible to create a matrix
+where each column is a basis of the polynomial and its partial derivative. Let <b>Poly
+</b>be this matrix. In this work, the resulting polynomial function will be of
+degree 2 as in the study from Macedo (2010). The dimension of the polynomial
+functions space of two variables of degree two is 6. The matrix has 3n rows and
+6 columns. The first n rows are the basis polynomial functions evaluated at the
+entry points <b>P</b>. The n+1 to 3n rows are the gradient evaluation of the
+basis polynomial functions evaluated at the entry points P.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=717 height=316 id="Picture 24"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image008.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+And the new system which need to be solved is the following. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=688 height=122 id="Picture 23"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image009.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The system to invert is bigger but in fact it is possible to solve it part by
+part. The set of equations to solve it by part is the following: </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=561 height=159 id="Picture 22"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image010.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Using the same notation for the evaluation points the new value for the points
+are given by: </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=837 height=109 id="Picture 21"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image011.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+</span><b><span style='font-size:24.0pt;font-family:"Times New Roman",serif'>Result
+in 2D</span></b><span style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+In 2D the surface to interpolate is a face. The points and their normals are
+represented in the following figure: </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=486 height=364 id="Picture 20"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image012.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The algorithm was tested with the Gaussian RBF. The expression is recalled in
+the following expression. X is the norm of the matrix of distance and r is the
+radius of the RBF. For clarification, the product used to calculate the
+exponential and the square is the Hadamart product. In other words, the
+exponential and the square power are applied on each term of the matrix.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=364 height=86 id="Picture 19"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image013.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The next figure presents the shape of the implicit function and the
+reconstructed curve (in black in the drawing). Different radius for the RBF are
+compared. The polynomial function improves the reconstitution of the face for
+an adapted radius. If the radius is too big or too small, the implicit function
+is not able to reconstruct properly the image. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1099 height=503 id="Picture 18"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image014.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+One other advantage of the polynomial function is to avoid artefacts in the
+implicit function. Indeed, when the number of points increases some
+oscillations can appear in the implicit function which creates undesired curves.
+Indeed with 200 points and without the polynomial function appear some
+&quot;cheeks&quot; on the face. With the polynomial function the face stays
+well approximated as it can be shown in the following picture.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1196 height=716 id="Picture 17"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image015.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The other RBF used is the Wendland's function defined. This RBF have been also
+used in the study from Macedo (2010). The function is defined here:</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=678 height=199 id="Picture 16"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image016.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+All the pictures are done with 40 points. The RBF radius is varying and the
+effect of the polynomial function can be appreciated. For r = 10, the function
+is completely different. Inside the face the implicit function is now positive.
+The size of the face is 1 so r = 10 is not physically realistic.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1252 height=449 id="Picture 15"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image017.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The reconstruction using the Wendland’s RBF are better than using the Gaussian
+function.</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><b><span
+style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+</span></b><b><span style='font-size:24.0pt;font-family:"Times New Roman",serif'>Results
+in 3D</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The following figure shows the zero surface of the implicit function of a
+sphere using Wendland's RBF. The sphere is represented by six points with the
+normal pointing at each extremity.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1194 height=545 id="Picture 14"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image018.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+This picture can be compared with the following figure from Macedo (2010). Even
+if it is not clear in the article if they used the polynomial functions or not,
+it can be guessed from the results that they are not used in this case.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=471 height=176 id="Picture 13"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image019.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Also, to compare with the paper and see how the algorithm treats close sheets,
+the points of two tori closing one in each other are created. The effect of the
+polynomial function can be seen in 3D in the following picture. The polynomial
+function eliminates the artefact in the implicit function. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1191 height=480 id="Picture 12"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image020.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The modification of the implicit function for two tori can be shown in the
+following figure. The number of points used to represent the two tori is 120. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=961 height=528 id="Picture 11"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image021.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The two tori are getting better approximated when the number of points used to
+approximate them is greater. An evolution of the implicit surface created is
+shown in the following picture. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1264 height=335 id="Picture 10"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image022.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Finally, the algorithm was used to give an implicit function of the rabbit. The
+result is not conclusive. There is a lot of artefact which are present even
+with the polynomial function and the best radius. Following the figure with a
+radius = 1 which have been manually choose to be the best. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=640 height=480 id="Picture 9"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image023.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Others RBF have been implement in 3D. The following figure show two tori and
+the rabbit for the Gaussian RBF.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1207 height=480 id="Picture 8"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image024.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The multiquadric function is defined by the following expression.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=363 height=126 id="Picture 7"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image025.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+This RBF give much better results than the Gaussian and Wendland RBF for the
+two tori and the rabbit. The results are shown in the following figure. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1207 height=480 id="Picture 6"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image024.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:12.0pt;font-family:"Times New Roman",serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The inverse multiquadric function is defined by the following expression. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=238 height=124 id="Picture 5"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image026.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+The result with the inverse multiquadric RBF are not&nbsp;as good as with
+the&nbsp;multiquadric function. The two tori are not completely formed and the
+rabbit does not have a smoot skin. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1221 height=489 id="Picture 4"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image027.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+Finally, the spline poly harmonic has also been implemented. In this RBF, there
+is no radius parameter. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=204 height=61 id="Picture 3"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image028.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+This RBF is working very good on the torus. This RBF worked as good with few
+points and many points on the torus. Concerning the rabbit, the surface is well
+represented but an artefact is present which link the tail to the ears. </span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1100 height=482 id="Picture 2"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image029.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+In comparison is shown the same result using the RBF reconstruction previously developed
+in the Geometric Modeling class.</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal'><span style='font-size:12.0pt;font-family:
+"Times New Roman",serif'><img width=1236 height=480 id="Picture 1"
+src="Hermit_Radial_Basis_Function_Theodore_Meynard_files/image030.jpg"></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><span
+style='font-size:24.0pt;font-family:"Times New Roman",serif'><br>
+<b>Conclusion</b></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;line-height:normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'>&nbsp;&nbsp;&nbsp;
+In this work, the HRBF reconstruction have been implemented in Matlab. Many RBF
+have been tested and compared. To sum up, Wendland's function gives good
+results but finding the radius parameter is delicate. This function is really
+sensitive to its radius for the reconstruction. The multiquadratic RBF gives
+good result and not as sensitive with the radius. <br>
+&nbsp;&nbsp;&nbsp; Unity partition have also been implemented in this project
+and can be tested in the code. The results are not fully understood and will be
+researched in the future. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:13.5pt;font-family:"Times New Roman",serif'><br>
+</span><b><span style='font-size:24.0pt;font-family:"Times New Roman",serif'>References</span></b></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='line-height:normal'><span style='font-size:13.5pt;
+     font-family:"Times New Roman",serif'>I. Macêdo , J. P. Gois and L. Velho: <i>Hermite
+     Radial Basis Functions Implicits, </i>2010</span></li>
+ <li class=MsoNormal style='line-height:normal'><span lang=PT-BR
+     style='font-size:13.5pt;font-family:"Times New Roman",serif'>Afonso Paiva,
+     <i>Lecture notes&nbsp; Geometric modeling, </i>2016</span><span
+     lang=PT-BR style='font-size:12.0pt;font-family:"Times New Roman",serif'> </span></li>
+</ul>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal'><span
+lang=PT-BR style='font-size:12.0pt;font-family:"Times New Roman",serif'><br>
+<br>
+<br>
+</span></p>
+
+<p class=MsoNormal><span lang=PT-BR>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>
